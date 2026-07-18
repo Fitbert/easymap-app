@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1025784075579",
+    "project_id": "easymap-44968",
+    "storage_bucket": "easymap-44968.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1025784075579:android:025819b56a8171cf51531e",
+        "android_client_info": {
+          "package_name": "com.easymap.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAM-5qZlFQsjPlkhoCVK7_wq8iUBgphZSo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

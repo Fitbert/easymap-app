@@ -1,14 +1,53 @@
-import { Text } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Text, View } from 'react-native';
+import { BigButton } from '../../components/BigButton';
 import { PrimaryScreen } from '../../components/PrimaryScreen';
-import { fontSize } from '../../lib/theme';
+import { auth } from '../../lib/firebase';
+import { colors, fontSize } from '../../lib/theme';
+import type { FirebaseAuthTypes } from '@react-native-firebase/auth';
 
-// Placeholder for this phase. Helper Mode is built after Senior Mode is
-// complete — see Task #7 (create family/invite, edit favorites, live
-// location, send destination).
 export default function HelperHome() {
+  const router = useRouter();
+  const [user, setUser] = useState<FirebaseAuthTypes.User | null | undefined>(undefined);
+
+  useEffect(() => auth().onAuthStateChanged(setUser), []);
+
+  if (user === undefined) {
+    return (
+      <View style={styles.loading}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
+  if (!user) {
+    return (
+      <PrimaryScreen title="Helper Mode" showBack={false}>
+        <Text style={styles.body}>Sign in with your phone number to get started.</Text>
+        <BigButton label="Sign In" onPress={() => router.push('/helper/sign-in')} />
+      </PrimaryScreen>
+    );
+  }
+
   return (
-    <PrimaryScreen title="Helper Mode">
-      <Text style={{ fontSize: fontSize.body }}>Helper mode is coming in the next phase.</Text>
+    <PrimaryScreen title="Helper Mode" showBack={false}>
+      <BigButton label="Invite a Family Member" onPress={() => router.push('/helper/invite')} />
+      <Text style={styles.body}>Editing favorites and the call-for-help contact are coming next.</Text>
     </PrimaryScreen>
   );
 }
+
+const styles = {
+  loading: {
+    flex: 1,
+    justifyContent: 'center' as const,
+    alignItems: 'center' as const,
+    backgroundColor: colors.background,
+  },
+  body: {
+    fontSize: fontSize.body,
+    color: colors.text,
+    textAlign: 'center' as const,
+  },
+};

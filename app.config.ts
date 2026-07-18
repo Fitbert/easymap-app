@@ -21,14 +21,20 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
           'EasyMap uses your location to show you where you are and find places near you.',
       },
     ],
+    '@react-native-firebase/app',
+    '@react-native-firebase/auth',
   ],
   ios: {
     supportsTablet: true,
+    bundleIdentifier: 'com.easymap.app',
+    googleServicesFile: './GoogleService-Info.plist',
     config: {
       googleMapsApiKey,
     },
   },
   android: {
+    package: 'com.easymap.app',
+    googleServicesFile: './google-services.json',
     adaptiveIcon: {
       backgroundColor: '#E6F4FE',
       foregroundImage: './assets/android-icon-foreground.png',
