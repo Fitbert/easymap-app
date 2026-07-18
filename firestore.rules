@@ -81,5 +81,13 @@ service cloud.firestore {
       allow read: if isSignedIn();
       allow write: if false;
     }
+
+    // A uid -> familyId pointer, written only by the pairing Cloud
+    // Functions, so the client can find "my family" without a
+    // collection-group query.
+    match /users/{uid} {
+      allow read: if isSignedIn() && request.auth.uid == uid;
+      allow write: if false;
+    }
   }
 }

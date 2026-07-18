@@ -36,6 +36,9 @@ export const createInvite = onCall<CreateInviteData>(async (request) => {
       authType: 'phone',
       joinedAt: FieldValue.serverTimestamp(),
     });
+    // Lets the client resolve "my family" with a single doc read instead of
+    // a collection-group query across every family's members subcollection.
+    batch.set(db.doc(`users/${uid}`), { familyId });
     await batch.commit();
   } else {
     const memberDoc = await db.doc(`families/${familyId}/members/${uid}`).get();

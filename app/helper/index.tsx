@@ -33,7 +33,12 @@ export default function HelperHome() {
   return (
     <PrimaryScreen title="Helper Mode" showBack={false}>
       <BigButton label="Invite a Family Member" onPress={() => router.push('/helper/invite')} />
-      <Text style={styles.body}>Editing favorites and the call-for-help contact are coming next.</Text>
+      <BigButton label="Favorite Places" variant="secondary" onPress={() => router.push('/helper/favorites')} />
+      <BigButton
+        label="Call for Help Contact"
+        variant="secondary"
+        onPress={() => router.push('/helper/call-contact')}
+      />
     </PrimaryScreen>
   );
 }

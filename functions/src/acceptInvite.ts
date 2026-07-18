@@ -53,6 +53,7 @@ export const acceptInvite = onCall<AcceptInviteData>(async (request) => {
     usedAt: FieldValue.serverTimestamp(),
     usedBy: uid,
   });
+  batch.set(db.doc(`users/${uid}`), { familyId });
   await batch.commit();
 
   const familyDoc = await db.doc(`families/${familyId}`).get();
