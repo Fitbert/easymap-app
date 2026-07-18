@@ -1,0 +1,85 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isFamilyMember(familyId) {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/families/$(familyId)/members/$(request.auth.uid));
+    }
+
+    function memberRole(familyId) {
+      return get(/databases/$(database)/documents/families/$(familyId)/members/$(request.auth.uid)).data.role;
+    }
+
+    function isHelper(familyId) {
+      return isFamilyMember(familyId) && memberRole(familyId) == 'helper';
+    }
+
+    function isSenior(familyId) {
+      return isFamilyMember(familyId) && memberRole(familyId) == 'senior';
+    }
+
+    match /families/{familyId} {
+      allow read: if isFamilyMember(familyId);
+      // Family creation + the creator's own membership doc are written
+      // together by the createFamily Cloud Function (Admin SDK), not
+      // directly by clients, so there's no client-side create rule here.
+      allow update: if isHelper(familyId);
+      allow delete: if false;
+
+      match /members/{uid} {
+        allow read: if isFamilyMember(familyId);
+        // Membership is only ever granted by the acceptInvite Cloud
+        // Function (Admin SDK, validates the single-use invite token) —
+        // never by a direct client write. This is what stops someone from
+        // just writing themselves into a family without an invite.
+        allow write: if false;
+      }
+
+      match /favorites/{favoriteId} {
+        allow read: if isFamilyMember(familyId);
+        allow write: if isHelper(familyId);
+      }
+
+      match /callForHelp/{docId} {
+        allow read: if isFamilyMember(familyId);
+        allow write: if isHelper(familyId);
+      }
+
+      match /liveLocation/{seniorUid} {
+        // Only the senior can write their own location doc — a helper can
+        // never push a location, and a senior can never write another
+        // senior's doc.
+        allow write: if isSenior(familyId) && request.auth.uid == seniorUid;
+        // The senior can always read their own doc (to see/toggle their
+        // own sharing state). A helper can only read it while the senior
+        // has sharingEnabled on — consent enforced at the database layer,
+        // not just in the UI.
+        allow read: if (isSenior(familyId) && request.auth.uid == seniorUid) ||
+          (isHelper(familyId) && resource.data.sharingEnabled == true);
+      }
+
+      match /pendingDestination/{docId} {
+        allow read: if isFamilyMember(familyId);
+        // Helper sends a destination...
+        allow create, update: if isHelper(familyId) && request.resource.data.sentBy == request.auth.uid;
+        // ...senior can only respond by changing the status field.
+        allow update: if isSenior(familyId) &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']);
+      }
+    }
+
+    // Looked up by token before family membership exists, so this is
+    // top-level rather than nested. Creation and marking-used both happen
+    // via the acceptInvite/createInvite Cloud Functions, never directly.
+    match /invites/{token} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+  }
+}
