@@ -28,6 +28,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     supportsTablet: true,
     bundleIdentifier: 'com.easymap.app',
     googleServicesFile: './GoogleService-Info.plist',
+    // We only use standard HTTPS/TLS (via Firebase, Google Maps) — no
+    // custom encryption — so this is accurate, and it skips the export-
+    // compliance prompt on every future build/submission.
+    infoPlist: {
+      ITSAppUsesNonExemptEncryption: false,
+    },
     config: {
       googleMapsApiKey,
     },
