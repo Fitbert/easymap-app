@@ -54,7 +54,7 @@ export default function HelperSignIn() {
             style={styles.input}
             value={phone}
             onChangeText={setPhone}
-            placeholder="+1 555 555 5555"
+            placeholder="555 555 5555"
             keyboardType="phone-pad"
             autoFocus
           />
